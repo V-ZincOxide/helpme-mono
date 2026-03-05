@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help me, MONOOOOOO!!</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            font-size: 16px;
+        }
+
+        h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        h4 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .beta-disclaimer {
+            text-align: center;
+            font-size: 14px;
+            color: #d9534f;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Make inputs larger and easier to touch */
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        /* Large touch targets for radio buttons */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .radio-group label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            /* Remove blue highlight on mobile */
+        }
+
+        /* Hide the actual radio input visually, but keep it accessible */
+        .radio-group input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        /* Correct structure for pure CSS styling without :has() */
+        .preset-container {
+            position: relative;
+        }
+
+        .preset-container input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .preset-container label {
+            display: block;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .preset-container input[type="radio"]:checked+label {
+            border-color: #007bff;
+            background-color: #e7f1ff;
+            color: #007bff;
+        }
+
+        /* Make submit button prominent */
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button[type="submit"]:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        label.section-label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Help me, MONOOOOOO!!</h3>
+    <h4>( °∀°)o彡° もーの！ もーの！( °∀°)o彡°たすけてもーの!!</h4>
+    <p class="beta-disclaimer">※ FURST CLASS運営公式とは一切関係ありません。
+    </p>
+    <form id="requestForm"
+        action="https://script.google.com/macros/s/AKfycbw-626tCGjfOis4LZkny2YiOIV3w14AADHS4FyO3xNPlsBbkTQjPLvdN-97cYK7UAYZ/exec"
+        method="POST">
+
+        <label class="section-label">名前:</label>
+        <input type="text" id="nameInput" name="name" required placeholder="ネームタグ上の名もしくはキャラ名">
+
+        <label class="section-label">位置:</label>
+        <input type="text" id="locationInput" name="location" required placeholder="例：１階〇番ブース、３階エレベーター前">
+
+        <label class="section-label">要件:</label>
+        <div class="radio-group">
+            <div class="preset-container">
+                <input type="radio" id="preset1" name="preset" value="通訳が必要です" checked>
+                <label for="preset1">通訳が必要です</label>
+            </div>
+            <!-- <div class="preset-container">
+                <input type="radio" id="preset2" name="preset" value="質問があります">
+                <label for="preset2">質問があります</label>
+            </div> -->
+            <div class="preset-container">
+                <input type="radio" id="presetCustom" name="preset" value="custom">
+                <label for="presetCustom">その他（自由入力）</label>
+            </div>
+        </div>
+
+        <textarea id="messageInput" name="customMessage" placeholder="詳細を入力してください"></textarea>
+
+        <button type="submit" id="submitBtn">送信</button>
+    </form>
+
+    <div id="resultMsg" style="margin-top: 15px; font-weight: bold; font-size: 18px; text-align: center;"></div>
+
+    <script>
+        const form = document.getElementById('requestForm');
+        const nameInput = document.getElementById('nameInput');
+        const locationInput = document.getElementById('locationInput');
+        const messageInput = document.getElementById('messageInput');
+        const resultMsg = document.getElementById('resultMsg');
+        const submitBtn = document.getElementById('submitBtn');
+        const presets = document.querySelectorAll('input[name="preset"]');
+
+        nameInput.value = localStorage.getItem('savedName') || '';
+        locationInput.value = localStorage.getItem('savedLocation') || '';
+
+        presets.forEach(radio => {
+            radio.addEventListener('change', () => {
+                messageInput.required = (radio.value === 'custom');
+            });
+        });
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            localStorage.setItem('savedName', nameInput.value);
+            localStorage.setItem('savedLocation', locationInput.value);
+
+            submitBtn.disabled = true;
+            resultMsg.textContent = '送信中...';
+            resultMsg.style.color = '#333';
+
+            const formData = new FormData(form);
+            const selectedPreset = document.querySelector('input[name="preset"]:checked').value;
+
+            const finalMessage = selectedPreset === 'custom' ? messageInput.value : selectedPreset;
+            formData.set('message', finalMessage);
+            formData.delete('customMessage');
+            formData.delete('preset');
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                mode: 'no-cors'
+            }).then(() => {
+                submitBtn.disabled = false;
+                const now = new Date();
+                const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
+                    now.getMinutes().toString().padStart(2, '0') + ':' +
+                    now.getSeconds().toString().padStart(2, '0');
+                resultMsg.textContent = '送信が完了しました (' + timeStr + ')';
+                resultMsg.style.color = 'green';
+                messageInput.value = '';
+            }).catch(err => {
+                submitBtn.disabled = false;
+                resultMsg.textContent = 'エラーが発生しました。再試行してください。';
+                resultMsg.style.color = 'red';
+            });
+        });
+    </script>
+</body>
+
+</html>
