@@ -10,15 +10,19 @@
             font-family: sans-serif;
             margin: 20px;
             font-size: 16px;
+            padding-bottom: 50px;
+            /* スクロールした時に下部に余白を持たせる */
         }
 
-        h3 {
+        h2 {
             margin-top: 0;
+            margin-bottom: 5px;
             text-align: center;
         }
 
         h4 {
             margin-top: 0;
+            margin-bottom: 10px;
             text-align: center;
         }
 
@@ -26,7 +30,7 @@
             text-align: center;
             font-size: 14px;
             color: #d9534f;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: bold;
         }
 
@@ -70,13 +74,7 @@
             /* Remove blue highlight on mobile */
         }
 
-        /* Hide the actual radio input visually, but keep it accessible */
-        .radio-group input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+
 
         /* Correct structure for pure CSS styling without :has() */
         .preset-container {
@@ -105,9 +103,9 @@
         }
 
         .preset-container input[type="radio"]:checked+label {
-            border-color: #007bff;
-            background-color: #e7f1ff;
-            color: #007bff;
+            border-color: #303d2e;
+            background-color: #d4edda;
+            color: #303d2e;
         }
 
         /* Make submit button prominent */
@@ -138,42 +136,47 @@
 </head>
 
 <body>
-    <h3>Help me, MONOOOOOO!!</h3>
-    <h4>( °∀°)o彡° もーの！ もーの！( °∀°)o彡°たすけてもーの!!</h4>
-    <p class="beta-disclaimer">※ FURST CLASS運営公式とは一切関係ありません。
+    <h2>Help me, MONOOOOOO!!</h2>
+    <h4>( °∀°)o彡° モーノ！ ( °∀°)o彡° モーノ！</h4>
+    <p class="beta-disclaimer">※FURST CLASS公式とは一切関係ありません。
     </p>
     <form id="requestForm"
-        action="https://script.google.com/macros/s/AKfycbw-626tCGjfOis4LZkny2YiOIV3w14AADHS4FyO3xNPlsBbkTQjPLvdN-97cYK7UAYZ/exec"
+        action="https://script.google.com/macros/s/AKfycbz1muBXXyKKaVr7K3pzVb5uHoHq-04UM3Qy0o39waM_oZSYnuF7IZCTqUDQP8p5EYCv/exec"
         method="POST">
 
-        <label class="section-label">名前:</label>
-        <input type="text" id="nameInput" name="name" required placeholder="ネームタグ上の名もしくはキャラ名">
+        <label class="section-label">名前</label>
+        <input type="text" id="nameInput" name="name" required placeholder="ネームタグ表記・キャラ名" enterkeyhint="next">
 
-        <label class="section-label">位置:</label>
-        <input type="text" id="locationInput" name="location" required placeholder="例：１階〇番ブース、３階エレベーター前">
+        <label class="section-label">現在位置</label>
+        <input type="text" id="locationInput" name="location" required placeholder="例：１階〇番ブース前" enterkeyhint="done">
 
-        <label class="section-label">要件:</label>
+        <label class="section-label">要件</label>
         <div class="radio-group">
             <div class="preset-container">
-                <input type="radio" id="preset1" name="preset" value="通訳が必要です" checked>
-                <label for="preset1">通訳が必要です</label>
+                <input type="radio" id="preset1" name="preset" value="（プリセット）通訳が必要です" checked>
+                <label for="preset1">通訳をお願いしたい</label>
             </div>
-            <!-- <div class="preset-container">
-                <input type="radio" id="preset2" name="preset" value="質問があります">
-                <label for="preset2">質問があります</label>
-            </div> -->
             <div class="preset-container">
-                <input type="radio" id="presetCustom" name="preset" value="custom">
+                <input type="radio" id="preset2" name="preset" value="運営側に質問したい">
+                <label for="preset2">運営に質問したい</label>
+            </div>
+            <div class="preset-container">
+                <input type="radio" id="presetCustom" name="preset" value="その他（自由入力）">
                 <label for="presetCustom">その他（自由入力）</label>
             </div>
         </div>
 
-        <textarea id="messageInput" name="customMessage" placeholder="詳細を入力してください"></textarea>
+        <textarea id="messageInput" name="customMessage" placeholder="詳細を入力…" enterkeyhint="done"
+            inputmode="text"></textarea>
 
-        <button type="submit" id="submitBtn">送信</button>
+        <button type="submit" id="submitBtn">たすけて モーノ!!
+            <span style="font-size: 16px; font-weight: normal;">（送信する）</span>
+        </button>
     </form>
 
-    <div id="resultMsg" style="margin-top: 15px; font-weight: bold; font-size: 18px; text-align: center;"></div>
+    <div id="resultMsg"
+        style="margin-top: 15px; margin-bottom: 15px; font-weight: bold; font-size: 18px; text-align: center; white-space: pre-wrap;">
+    </div>
 
     <script>
         const form = document.getElementById('requestForm');
@@ -184,12 +187,50 @@
         const submitBtn = document.getElementById('submitBtn');
         const presets = document.querySelectorAll('input[name="preset"]');
 
-        nameInput.value = localStorage.getItem('savedName') || '';
+        // URLパラメータ（?name=〇〇）があれば取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const nameParam = urlParams.get('name');
+
+        // URLパラメータがあればそれを優先し、なければlocalStorageの保存値を使う
+        nameInput.value = nameParam || localStorage.getItem('savedName') || '';
         locationInput.value = localStorage.getItem('savedLocation') || '';
+
+        // 入力欄でエンターキーが押されたらキーボードを閉じる（＆誤送信を防ぐ）共通処理
+        function closeKeyboardOnEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // ここでフォームの送信（または改行）をブロック
+                e.target.blur();    // キーボードを閉じる
+            }
+        }
+
+        // 名前の入力欄でエンター（次へ）が押されたら位置入力へフォーカスを移す
+        nameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                locationInput.focus(); // 次の入力欄へ移動
+            }
+        });
+
+        // 位置・要件のエンターキー（完了）でキーボードを閉じる
+        locationInput.addEventListener('keydown', closeKeyboardOnEnter);
+        messageInput.addEventListener('keydown', closeKeyboardOnEnter);
 
         presets.forEach(radio => {
             radio.addEventListener('change', () => {
-                messageInput.required = (radio.value === 'custom');
+                messageInput.required = (radio.id !== 'preset1');
+
+                // フォーカスを当てるIDのリスト（今後増えたらここに追加）
+                const focusTargetIds = ['preset2', 'presetCustom'];
+
+                if (focusTargetIds.includes(radio.id)) {
+                    // 指定したプリセットが選ばれたらテキストエリアにフォーカス 
+                    messageInput.focus();
+                } else {
+                    // それ以外は一番下（resultMsg付近）までスムーズにスクロール
+                    setTimeout(() => {
+                        resultMsg.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    }, 100);
+                }
             });
         });
 
@@ -200,15 +241,13 @@
             localStorage.setItem('savedLocation', locationInput.value);
 
             submitBtn.disabled = true;
-            resultMsg.textContent = '送信中...';
+            resultMsg.textContent = '腕を高く振り上げて...';
             resultMsg.style.color = '#333';
 
             const formData = new FormData(form);
             const selectedPreset = document.querySelector('input[name="preset"]:checked').value;
 
-            const finalMessage = selectedPreset === 'custom' ? messageInput.value : selectedPreset;
-            formData.set('message', finalMessage);
-            formData.delete('customMessage');
+            formData.set('message', selectedPreset);
             formData.delete('preset');
 
             fetch(form.action, {
@@ -218,15 +257,13 @@
             }).then(() => {
                 submitBtn.disabled = false;
                 const now = new Date();
-                const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
-                    now.getMinutes().toString().padStart(2, '0') + ':' +
-                    now.getSeconds().toString().padStart(2, '0');
-                resultMsg.textContent = '送信が完了しました (' + timeStr + ')';
+                const timeStr = now.toTimeString().split(' ')[0]; // HH:mm:ss形式を確実に取得
+                resultMsg.textContent = '( °∀°)o彡° 腕を強く振り下ろした！\n(' + timeStr + ')';
                 resultMsg.style.color = 'green';
                 messageInput.value = '';
             }).catch(err => {
                 submitBtn.disabled = false;
-                resultMsg.textContent = 'エラーが発生しました。再試行してください。';
+                resultMsg.textContent = '( ；∀；) 声が届かなかったようだ…\nもう一度腕を振り下ろそう！';
                 resultMsg.style.color = 'red';
             });
         });
